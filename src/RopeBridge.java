@@ -7,13 +7,20 @@ public class RopeBridge {
      **/
     private static final int NR_OF_PEOPLE = 20;
     private static final int BRIDGE_CAPACITY = 3;
+    private int leftPool = 20;
+    private int rightPool = 0;
+    //false = left
+    //true = right
+    private boolean leftToRight = false;
 
     private Person[] person = new Person[NR_OF_PEOPLE];
 
-    private Semaphore leftFreePass;
+    private Semaphore leftFreePass, rightFreePass;
 
     public RopeBridge() {
+
         leftFreePass = new Semaphore(BRIDGE_CAPACITY, true);
+        rightFreePass = new Semaphore(0, true);
 
         for (int i = 0; i < NR_OF_PEOPLE; i++) {
             person[i] = new Person("P" + i); /* argument list can be extended */
@@ -25,29 +32,61 @@ public class RopeBridge {
      * Inner person class.
      */
     class Person extends Thread {
+        boolean direction  = false;
+
         public Person(String name) {
             super(name);
             //Anything else you want to do in the constructor...
         }
 
         public void run() {
+
+            //false = left
+            //true = right
+
             while (true) {
                 justLive();
-
                 try {
-                    leftFreePass.acquire();
-                    System.out.println(getName() + " is on the bridge!");
 
-                    //Wait for a moment...
-                    Thread.sleep((2000));
+                    if (leftToRight == direction){
 
-                    //Here it all has to happen...
+                        leftFreePass.acquire();
+                        System.out.println(getName() + " is on the bridge! " + direction);
 
-                    leftFreePass.release();
+                        //Wait for a moment...
+                        Thread.sleep((2000));
+
+                        //Here it all has to happen...
+
+                        leftFreePass.release();
+
+                        if (direction){
+                            //Update the number of people on each side.
+                            rightPool--;
+                            leftPool++;
+                        } else if (!direction){
+                            //Update the number of people on each side.
+                            leftPool--;
+                            rightPool++;
+                        }
+
+                        //Change your direction
+                        direction = !direction;
+
+                    } else {
+                        rightFreePass.acquire();
+                    }
+
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                System.out.println(getName() + " has passed the bridge!");
+
+                if (leftPool == 0){
+                    leftToRight = true;
+                } else if (rightPool == 0){
+                    leftToRight = false;
+                }
+//                System.out.println(getName() + " has passed the bridge!");
             }
         }
 
