@@ -136,17 +136,6 @@ public class RopeBridge {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-
-//                try {
-//                    mutex.acquire();
-//                    if (waitingPeople == NR_OF_PEOPLE){
-//                        waitingQueue.release(5);
-//                    }
-//                    mutex.release();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-
             }
         }
 
