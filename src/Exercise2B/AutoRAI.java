@@ -9,9 +9,9 @@ public class AutoRAI {
 
     private Lock lock;
     //Conditions for viewers.
-    private Condition viewerSpaceAvailable;
+    private Condition viewerSpaceAvailable, viewersAllowed;
     //Conditions for buyers.
-    private Condition buyerAllowed;
+    private Condition buyerSpaceAvailable, buyerAllowed;
 
     private int numberOfVisitors = 0;
     private int successiveBuyers = 0;
@@ -20,6 +20,9 @@ public class AutoRAI {
     public AutoRAI() {
         lock = new ReentrantLock();
         viewerSpaceAvailable = lock.newCondition();
+        viewersAllowed = lock.newCondition();
+
+        buyerSpaceAvailable = lock.newCondition();
         buyerAllowed = lock.newCondition();
     }
 
@@ -27,59 +30,27 @@ public class AutoRAI {
         return numberOfVisitors == VISITOR_LIMIT;
     }
 
-    private boolean noViewers() {
+    private boolean noVisitorsInside() {
         return numberOfVisitors == 0;
     }
 
-    public void viewAutoRAI() throws InterruptedException {
+    //Methods...
+
+    public void viewerLoginAutoRAI() throws InterruptedException {
         lock.lock();
 
         try {
-            while (noViewerSpaceAvailable() || buyerInRoom != null) {
-                System.out.println(Thread.currentThread().getName() + " has to wait to go into the AutoRAI.");
+            while (noViewerSpaceAvailable()) {
+                //Wait, since the room is full and no new people can enter.
                 viewerSpaceAvailable.await();
             }
 
-            numberOfVisitors++;
-
-            //Do something more here, as you're now in the AutoRAI.
-            System.out.println(Thread.currentThread().getName() + " is in the AutoRAI!");
-
-            //...
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void leaveViewAutoRAI() throws InterruptedException {
-        lock.lock();
-
-        try {
-            //...
-
-            System.out.println(Thread.currentThread().getName() + " is leaving the AutoRAI!");
-
-            numberOfVisitors--;
-            viewerSpaceAvailable.signal();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public void buyAtAutoRAI() throws InterruptedException {
-        lock.lock();
-
-        try {
-            //...
-
-            while (successiveBuyers == 4) {
-                System.out.println(Thread.currentThread().getName() + " has to wait to buy at the AutoRAI.");
-                buyerAllowed.await();
+            while (buyerInRoom != null) {
+                //Wait, since there's a buyer in the room.
+                viewersAllowed.await();
             }
 
             numberOfVisitors++;
-            successiveBuyers++;
-            buyerInRoom = (Buyer) Thread.currentThread();
 
             //...
         } finally {
@@ -87,7 +58,44 @@ public class AutoRAI {
         }
     }
 
-    public void leaveBuyAutoRAI() throws InterruptedException {
+    public void viewerLogoutAutoRAI() throws InterruptedException {
+        lock.lock();
+
+        try {
+            //...
+
+            numberOfVisitors--;
+            //TODO: First check if there are buyers waiting, if not, allow more viewers in.
+            viewersAllowed.signal();
+            buyerSpaceAvailable.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void buyerLoginAutoRAI() throws InterruptedException {
+        lock.lock();
+
+        try {
+            while (successiveBuyers == 4) {
+                buyerAllowed.await();
+            }
+
+            while (!noVisitorsInside()) {
+                buyerSpaceAvailable.await();
+            }
+
+            buyerInRoom = (Buyer) Thread.currentThread();
+            numberOfVisitors++;
+            successiveBuyers++;
+
+            //...
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void buyerLogoutAutoRAI() throws InterruptedException {
         lock.lock();
 
         try {
@@ -98,14 +106,15 @@ public class AutoRAI {
 
             if (successiveBuyers < 4) {
                 buyerAllowed.signal();
+                buyerSpaceAvailable.signal();
+                //TODO: If there's no buyer, the buyerInRoom == null. But I'm not sure
+//                viewersAllowed.signalAll();
             } else {
-                successiveBuyers = 0;
-                viewerSpaceAvailable.signalAll();
+                //Now that 4 buyers have gone in after each other, you should allow all waiting visitors in.
+                viewersAllowed.signalAll();
             }
         } finally {
             lock.unlock();
         }
     }
-
-    //Methods...
 }

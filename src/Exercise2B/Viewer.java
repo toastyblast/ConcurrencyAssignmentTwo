@@ -14,21 +14,28 @@ public class Viewer extends Thread {
 
             try {
                 justLive();
-                autoRAI.viewAutoRAI();
-                justLive();
-                autoRAI.leaveViewAutoRAI();
+                autoRAI.viewerLoginAutoRAI();
+                viewCars();
+                autoRAI.viewerLogoutAutoRAI();
             } catch (InterruptedException ie) {
                 //Do nothing...
             }
         }
     }
 
-    //Methods...
-
     private void justLive() {
         try {
-//            System.out.println(getName() + " is travelling to the AutoRAI");
+            System.out.println(getName() + " is travelling to the AutoRAI");
             Thread.sleep((int) (Math.random() * 1000));
+        } catch (InterruptedException e) {
+            //Do nothing...
+        }
+    }
+
+    private void viewCars() {
+        try {
+            System.out.println(getName() + " is viewing the cars at the AutoRAI");
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             //Do nothing...
         }

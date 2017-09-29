@@ -14,23 +14,30 @@ public class Buyer extends Thread {
 
             try {
                 justLive();
-                autoRAI.buyAtAutoRAI();
-                justLive();
-                autoRAI.leaveBuyAutoRAI();
+                autoRAI.buyerLoginAutoRAI();
+                buyCar();
+                autoRAI.buyerLogoutAutoRAI();
             } catch (InterruptedException ie) {
                 //...
             }
         }
     }
 
-    //Methods...
-
     private void justLive() {
         try {
-//            System.out.println(getName() + " is travelling to the AutoRAI!");
+            System.out.println(getName() + " is travelling to the AutoRAI");
             Thread.sleep((int) (Math.random() * 1000));
         } catch (InterruptedException e) {
-            //...
+            //Do nothing...
+        }
+    }
+
+    private void buyCar() {
+        try {
+            System.out.println(getName() + " is buying a car at the AutoRAI");
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            //Do nothing...
         }
     }
 }
