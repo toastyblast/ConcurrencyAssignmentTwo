@@ -11,7 +11,7 @@ public class AutoRAI {
     //Conditions for viewers.
     private Condition viewerSpaceAvailable, viewersAllowed;
     //Conditions for buyers.
-    private Condition buyerSpaceAvailable, buyerAllowed;
+    private Condition buyerAllowed;
 
     private int numberOfVisitors = 0;
     private int successiveBuyers = 0;
@@ -22,7 +22,6 @@ public class AutoRAI {
         viewerSpaceAvailable = lock.newCondition();
         viewersAllowed = lock.newCondition();
 
-        buyerSpaceAvailable = lock.newCondition();
         buyerAllowed = lock.newCondition();
     }
 
@@ -66,8 +65,9 @@ public class AutoRAI {
 
             numberOfVisitors--;
             //TODO: First check if there are buyers waiting, if not, allow more viewers in.
-            viewersAllowed.signal();
-            buyerSpaceAvailable.signal();
+            viewerSpaceAvailable.signal();
+//            viewersAllowed.signal();
+//            buyerAllowed.signalAll();
         } finally {
             lock.unlock();
         }
@@ -77,14 +77,12 @@ public class AutoRAI {
         lock.lock();
 
         try {
-            while (successiveBuyers == 4) {
+            while (successiveBuyers == 4 || !noVisitorsInside()) {
+                //Wait until all currently waiting viewers have logged out again.
                 buyerAllowed.await();
             }
 
-            while (!noVisitorsInside()) {
-                buyerSpaceAvailable.await();
-            }
-
+            //TODO: Make this piece more safer, instead of this clunky cast.
             buyerInRoom = (Buyer) Thread.currentThread();
             numberOfVisitors++;
             successiveBuyers++;
@@ -106,12 +104,12 @@ public class AutoRAI {
 
             if (successiveBuyers < 4) {
                 buyerAllowed.signal();
-                buyerSpaceAvailable.signal();
                 //TODO: If there's no buyer, the buyerInRoom == null. But I'm not sure
 //                viewersAllowed.signalAll();
             } else {
                 //Now that 4 buyers have gone in after each other, you should allow all waiting visitors in.
                 viewersAllowed.signalAll();
+                successiveBuyers = 0;
             }
         } finally {
             lock.unlock();
