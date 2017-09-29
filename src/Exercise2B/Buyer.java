@@ -18,7 +18,8 @@ public class Buyer extends Thread {
                 buyCar();
                 autoRAI.buyerLogoutAutoRAI();
             } catch (InterruptedException ie) {
-                //...
+                Thread.currentThread().interrupt();
+                return;
             }
         }
     }

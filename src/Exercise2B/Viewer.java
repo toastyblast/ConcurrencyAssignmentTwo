@@ -18,7 +18,8 @@ public class Viewer extends Thread {
                 viewCars();
                 autoRAI.viewerLogoutAutoRAI();
             } catch (InterruptedException ie) {
-                //Do nothing...
+                Thread.currentThread().interrupt();//preserve the message
+                return;
             }
         }
     }
