@@ -10,18 +10,28 @@ public class Viewer extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-
-            try {
-                justLive();
-                autoRAI.viewerLoginAutoRAI();
-                viewCars();
-                autoRAI.viewerLogoutAutoRAI();
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();//preserve the message
-                return;
-            }
+        try {
+            justLive();
+            autoRAI.viewerLoginAutoRAI();
+            viewCars();
+            autoRAI.viewerLogoutAutoRAI();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();//preserve the message
+            return;
         }
+
+//        while (true) {
+//
+//            try {
+//                justLive();
+//                autoRAI.viewerLoginAutoRAI();
+//                viewCars();
+//                autoRAI.viewerLogoutAutoRAI();
+//            } catch (InterruptedException ie) {
+//                Thread.currentThread().interrupt();//preserve the message
+//                return;
+//            }
+//        }
     }
 
     private void justLive() {

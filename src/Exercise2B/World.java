@@ -4,8 +4,8 @@ package Exercise2B;
  * Application class. Run this to perform Exercise2B.
  */
 public class World {
-    private static final int NR_OF_VIEWERS = 8;
-    private static final int NR_OF_BUYERS = 12;
+    private static final int NR_OF_VIEWERS = 11;
+    private static final int NR_OF_BUYERS = 9;
 
     public static void main(String[] args) {
         AutoRAI autoRAI = new AutoRAI();

@@ -10,18 +10,28 @@ public class Buyer extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-
-            try {
-                justLive();
-                autoRAI.buyerLoginAutoRAI();
-                buyCar();
-                autoRAI.buyerLogoutAutoRAI();
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                return;
-            }
+        try {
+            justLive();
+            autoRAI.buyerLoginAutoRAI();
+            buyCar();
+            autoRAI.buyerLogoutAutoRAI();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            return;
         }
+
+//        while (true) {
+//
+//            try {
+//                justLive();
+//                autoRAI.buyerLoginAutoRAI();
+//                buyCar();
+//                autoRAI.buyerLogoutAutoRAI();
+//            } catch (InterruptedException ie) {
+//                Thread.currentThread().interrupt();
+//                return;
+//            }
+//        }
     }
 
     private void justLive() {
