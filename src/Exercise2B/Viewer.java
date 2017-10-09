@@ -1,6 +1,13 @@
 package Exercise2B;
 
+/**
+ * Viewer Thread class for the simulation of assignment 2B. Represents a viewer at the AutoRAI.
+ * These two Thread classes look a lot like each other. The reason for this is explained in the duo's documentation.
+ */
 public class Viewer extends Thread {
+    //Change this value to make the Thread perform multiple runs.
+    private final static int AMOUNT_OF_RUNS = 1;
+
     private AutoRAI autoRAI;
 
     public Viewer(String name, AutoRAI autoRAI) {
@@ -10,33 +17,27 @@ public class Viewer extends Thread {
 
     @Override
     public void run() {
-        try {
-            justLive();
-            autoRAI.viewerLoginAutoRAI();
-            viewCars();
-            autoRAI.viewerLogoutAutoRAI();
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();//preserve the message
-            return;
-        }
+        for (int i = 0; i < AMOUNT_OF_RUNS; i++) {
 
-//        while (true) {
-//
-//            try {
-//                justLive();
-//                autoRAI.viewerLoginAutoRAI();
-//                viewCars();
-//                autoRAI.viewerLogoutAutoRAI();
-//            } catch (InterruptedException ie) {
-//                Thread.currentThread().interrupt();//preserve the message
-//                return;
-//            }
-//        }
+            try {
+                System.out.println(getName() + " is travelling to the AutoRAI");
+                justLive();
+                autoRAI.viewerLoginAutoRAI();
+                viewCars();
+                autoRAI.viewerLogoutAutoRAI();
+                justLive();
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();//preserve the message
+                return;
+            }
+        }
     }
 
+    /**
+     * Method to simulate travel to the AutoRAI, or any action for that matter, actually making the Thread sleep.
+     */
     private void justLive() {
         try {
-            System.out.println(getName() + " is travelling to the AutoRAI");
             Thread.sleep((int) (Math.random() * 1000));
         } catch (InterruptedException e) {
             //Do nothing...
@@ -47,7 +48,8 @@ public class Viewer extends Thread {
         try {
             System.out.println(getName() + " is viewing the cars at the AutoRAI");
             Thread.sleep(2000);
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             //Do nothing...
         }
     }
