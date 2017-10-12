@@ -5,9 +5,9 @@ public class RopeBridge {
      * your s(hared) data structures to guarantee correct behaviour of the people
      * in passing the rope bridge
      **/
-    private static final int NR_OF_PEOPLE = 50;
+    private static final int NR_OF_PEOPLE = 40;
     private static final int BRIDGE_CAPACITY = 3;
-    private int peopleRemaining = NR_OF_PEOPLE;
+    private int remaining = NR_OF_PEOPLE;
     private int leftPool = 0;
     private int rightPool = 0;
     private int waitingPeople = 0;
@@ -29,21 +29,19 @@ public class RopeBridge {
         waitingTheDirectionToChangeQueue = new Semaphore(0, true);
 
         for (int i = 0; i < NR_OF_PEOPLE; i++) {
-            if (i % 2 == 0 /*i >= NR_OF_PEOPLE/2*/ ) {
+            if (i % 2 == 0 /*i <= 2*/ ) {
                 person[i] = new Person("P" + i, false); /* argument list can be extended */
                 leftPool++;
             } else {
                 person[i] = new Person("P" + i, true); /* argument list can be extended */
                 rightPool++;
-
             }
-//            person[i] = new Person("P" + i, true); /* argument list can be extended */
-//            rightPool++;
         }
 
         //The side that has more people on it becomes the first direction of the bridge.
         directionOfBridge = leftPool <= rightPool;
 
+        System.out.println("****Left: "+leftPool+"*****************************Right: "+rightPool+"***********************************Total: " + NR_OF_PEOPLE);
         for (int i = 0 ; i < NR_OF_PEOPLE; i++){
             person[i].start();
         }
@@ -72,88 +70,95 @@ public class RopeBridge {
                 justLive();
                 try {
 
+                    //Check if the direction of the person matches that of the bridge.
+                    //If it doesn't wait till direction is changed.
                     mutex.acquire();
-                    if(directionOfBridge != direction){
+                    if (directionOfBridge != direction){
+                        //Increase number of people waiting for the direction to change.
                         waitingPeople++;
                         mutex.release();
+                        //Queue.
                         waitingTheDirectionToChangeQueue.acquire();
+                        mutex.acquire();
+                        waitingPeople--;
+                        mutex.release();
                     } else {
                         mutex.release();
                     }
 
 
                     mutex.acquire();
-                    //If the direction of the person doesn't match that of the bridge, wait.
+                    //If the direction the person matches that of the bridge and the consecutive counter is lower than
+                    //8 go on the bridge.
                     if (directionOfBridge == direction && switchCounter < 8){
                         switchCounter++;
                         mutex.release();
 
+                        //Enter the bridge.
                         passingTheBridgeQueue.acquire();
-                        if (!direction) {
-                            System.out.println(getName() + " is on the bridge! " + "left to right " +  direction
-                                    + " Current direction: " + directionOfBridge + " " + (switchCounter) + " / 8");
-                        } else if (direction) {
-                            System.out.println(getName() + " is on the bridge! " + "right to left " +  direction
-                                    + " Current direction: " + directionOfBridge + " " + (switchCounter) + " / 8");
-                        }
-                        //When 8 people from one direction have crossed, switch the directions.
+                        System.out.println(getName() + "Has entered the bridge. Current direction: "
+                                + directionOfBridge + " Person direction: " + direction);
+
                         mutex.acquire();
-                        if (switchCounter == 8) {
-                            if (leftPool == 0 || rightPool == 0){
-                                System.out.println("WE ARE NOT SWITCHING BECAUSE THERE ARE NO PEOPLE FROM THE " +
-                                        "OTHER SIDE.");
-                            } else {
-                                directionOfBridge = !directionOfBridge;
-                                assert waitingPeople == waitingTheDirectionToChangeQueue.getQueueLength();
-                                assert switchCounter == 8;
-                                waitingTheDirectionToChangeQueue.release(waitingPeople);
-                                waitingPeople = 0;
-                                System.out.println("WE SWITCHED DIRECTION BECAUSE PEOPLE FROM THE OTHER SIDE GOT " +
-                                        "TIRED OF WAITING");
-                            }
-                            switchCounter = 0;
-                        }
-                        mutex.release();
-                        //If there are no people left in either sides of the bridge change directions accordingly.
-                        mutex.acquire();
+                        //Reduce the number of remaining people.
+                        remaining--;
+                        //Reduce the number of people, depending on, from which side they passed.
                         if (direction) {
                             rightPool--;
                         } else if (!direction) {
                             leftPool--;
                         }
+
                         if (!direction && leftPool == 0) {
+                            //If you are the last person on your side, change the directions so other people can pass.
+                            int temp = waitingPeople;
+                            //Change the direction of the bridge.
                             directionOfBridge = true;
-                            assert leftPool == 0;
-                            assert waitingPeople == waitingTheDirectionToChangeQueue.getQueueLength();
-                            waitingTheDirectionToChangeQueue.release(waitingPeople);
-                            waitingPeople = 0;
                             switchCounter = 0;
-                            System.out.println("WE SWITCHED DIRECTIONS BECAUSE I WAS THE LAST PERSON FROM MY SIDE");
+                            System.out.println("WE SWITCHED DIRECTIONS BECAUSE I WAS THE LAST PERSON FROM MY SIDE "
+                                    + remaining + " left " + leftPool + " right " + rightPool);
+                            //Release the waiting people.
+                            waitingTheDirectionToChangeQueue.release(temp);
+
                         } else if (direction && rightPool == 0) {
+                            //If you are the last person on your side, change the directions so other people can pass.
+                            int temp = waitingPeople;
+                            //Change the direction of the bridge.
                             directionOfBridge = false;
-                            assert rightPool == 0;
-                            assert waitingPeople == waitingTheDirectionToChangeQueue.getQueueLength();
-                            waitingTheDirectionToChangeQueue.release(waitingPeople);
-                            waitingPeople = 0;
                             switchCounter = 0;
-                            System.out.println("WE SWITCHED DIRECTIONS BECAUSE I WAS THE LAST PERSON FROM MY SIDE");
+                            System.out.println("WE SWITCHED DIRECTIONS BECAUSE I WAS THE LAST PERSON FROM MY SIDE "
+                                    + remaining + " left " + leftPool + " right " + rightPool);
+                            //Release the waiting people.
+                            waitingTheDirectionToChangeQueue.release(temp);
+
+                        } else if (switchCounter == 8) {
+                            //If 8 people have passed from one side, it is time to change directions.
+                            if (leftPool == 0 || rightPool == 0){
+                                //If there are no people left on either side, do not change the direction.
+                                System.out.println("WE ARE NOT SWITCHING BECAUSE THERE ARE NO PEOPLE FROM THE " +
+                                        "OTHER SIDE." + remaining + " left " + leftPool + " right " + rightPool);
+                                switchCounter = 0;
+                            } else {
+                                int temp = waitingPeople;
+                                //Change the direction of the bridge to the opposite.
+                                directionOfBridge = !directionOfBridge;
+                                switchCounter = 0;
+                                System.out.println("WE SWITCHED DIRECTION BECAUSE PEOPLE FROM THE OTHER SIDE GOT TIRED " +
+                                        remaining + " left " + leftPool + " right " + rightPool);
+                                //Release all of the waiting people.
+                                waitingTheDirectionToChangeQueue.release(temp);
+                            }
                         }
-                        //Check if someone is not left to wait forever.
-                        peopleRemaining--;
-                        if (peopleRemaining == 0){
-                            assert waitingPeople == 0;
-                        }
+
                         mutex.release();
-
+                        //Stop the lifecycle of the person.
                         stop = true;
-
+                        //Leave the bridge.
                         passingTheBridgeQueue.release();
+
+                    } else {
+                        mutex.release();
                     }
-//                    else {
-////                        waitingPeople++;
-////                        mutex.release();
-////                        waitingTheDirectionToChangeQueue.acquire();
-//                    }
 
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -163,7 +168,7 @@ public class RopeBridge {
 
         private void justLive() {
             try {
-                System.out.println(getName() + " is working/getting education " + direction);
+                System.out.println(getName() + " is working/getting education.");
                 Thread.sleep((int) (Math.random() * 1000));
             } catch (InterruptedException e) {
                 //...
