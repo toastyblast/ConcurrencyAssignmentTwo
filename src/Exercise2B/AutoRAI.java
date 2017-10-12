@@ -134,7 +134,7 @@ public class AutoRAI {
                 viewersAllowed.signalAll();
             }
             else if (noViewersWaiting()) {
-                //Last viewer to go into the AutoRAI after 4 successive buyers had entered, has to make sure that buyers
+                //Last viewer to go into the AutoRAI (after 4 successive buyers had entered), has to make sure that buyers
                 // are allowed in again as priority.
                 viewerTurn = false;
                 letNewViewersInLine = true;
@@ -231,19 +231,24 @@ public class AutoRAI {
                 else {
                     //But there are no viewers waiting in line to go in, so just let another buyer in.
                     successiveBuyers--;
-
+                    //There is a possibility there are no buyers anymore either, but just signal anyways. Checking if
+                    // there's no buyers also takes time, just like signalling. It's a choice of two evils, and we
+                    // chose to just do the signal either way.
                     buyerAllowed.signal();
                 }
             }
-            else if (noViewersWaiting()) {
-                //There are no viewers waiting anymore, but there are still buyers that want to go in, so let one in..
-                buyerAllowed.signal();
-            }
+//            else if (noViewersWaiting()) {
+//                //This was left here commented out just in case if leaving it out does turn out to allow some kind of 1 in 1 million grace case to happen. In which case it can be commented in again.
+//                //There are no viewers waiting anymore, but there are still buyers that want to go in, so let one in..
+//                buyerAllowed.signal();
+//            }
             else {
                 //There are no buyers waiting anymore, but there are viewers waiting, so let them in then.
                 viewerTurn = true;
                 letNewViewersInLine = true;
-
+                //There is a possibility there are no viewers anymore either, but just signal anyways. Checking if
+                // there's no viewers (in an if-statement) also takes time, just like signalling. It's a choice of
+                // two evils, and we chose to just do the signal either way.
                 viewerCanEnterLine.signalAll();
 
                 viewersAllowed.signalAll();

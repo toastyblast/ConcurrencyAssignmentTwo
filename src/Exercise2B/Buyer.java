@@ -21,6 +21,7 @@ public class Buyer extends Thread {
 
             try {
                 //Travel to the AutoRAI...
+                System.out.println(getName() + " is travelling to the AutoRAI");
                 justLive();
                 System.out.println(getName() + " arrived at the AutoRAI");
                 //Try to get into the autoRAI to buy a car

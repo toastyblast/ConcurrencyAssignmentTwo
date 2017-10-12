@@ -6,7 +6,7 @@ package Exercise2B;
  */
 public class Viewer extends Thread {
     //Change this value to make the Thread perform multiple runs.
-    private final static int AMOUNT_OF_RUNS = 3;
+    private final static int AMOUNT_OF_RUNS = 1;
 
     private AutoRAI autoRAI;
 
@@ -20,10 +20,15 @@ public class Viewer extends Thread {
         for (int i = 0; i < AMOUNT_OF_RUNS; i++) {
 
             try {
+                //Travel to the AutoRAI...
                 System.out.println(getName() + " is travelling to the AutoRAI");
                 justLive();
+                System.out.println(getName() + " arrived at the AutoRAI");
+                //Try to get into the AutoRAI.
                 autoRAI.viewerLoginAutoRAI();
+                //Now that you're inside, view the cars at your leisure!
                 viewCars();
+                //And then exit the AutoRAI once you're done.
                 autoRAI.viewerLogoutAutoRAI();
                 justLive();
             } catch (InterruptedException ie) {
