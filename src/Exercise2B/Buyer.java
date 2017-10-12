@@ -29,6 +29,7 @@ public class Buyer extends Thread {
                 buyCar();
                 //Then leave the AutoRAI again and signal the others.
                 autoRAI.buyerLogoutAutoRAI();
+                justLive();
             }
             catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
@@ -42,7 +43,7 @@ public class Buyer extends Thread {
      */
     private void justLive() {
         try {
-            Thread.sleep((int) (Math.random() * 1000));
+            Thread.sleep((int) (Math.random() * 2000));
         }
         catch (InterruptedException e) {
             //Do nothing...
@@ -55,7 +56,7 @@ public class Buyer extends Thread {
     private void buyCar() {
         try {
             System.out.println(getName() + " is buying a car at the AutoRAI");
-            Thread.sleep(2000);
+            Thread.sleep(3000);
         }
         catch (InterruptedException e) {
             //Do nothing...

@@ -6,7 +6,7 @@ package Exercise2B;
  */
 public class Viewer extends Thread {
     //Change this value to make the Thread perform multiple runs.
-    private final static int AMOUNT_OF_RUNS = 1;
+    private final static int AMOUNT_OF_RUNS = 3;
 
     private AutoRAI autoRAI;
 
@@ -38,7 +38,7 @@ public class Viewer extends Thread {
      */
     private void justLive() {
         try {
-            Thread.sleep((int) (Math.random() * 1000));
+            Thread.sleep((int) (Math.random() * 2000));
         } catch (InterruptedException e) {
             //Do nothing...
         }
@@ -47,7 +47,7 @@ public class Viewer extends Thread {
     private void viewCars() {
         try {
             System.out.println(getName() + " is viewing the cars at the AutoRAI");
-            Thread.sleep(2000);
+            Thread.sleep(3000);
         }
         catch (InterruptedException e) {
             //Do nothing...

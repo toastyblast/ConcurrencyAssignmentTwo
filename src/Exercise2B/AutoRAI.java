@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * should behave.
  */
 public class AutoRAI {
-    private static final int VISITOR_LIMIT = 10;
+    private static final int VISITOR_LIMIT = 5;
     private static final int SUCCESSIVE_BUYER_LIMIT = 4;
 
     private Lock lock;
