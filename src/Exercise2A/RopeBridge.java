@@ -1,3 +1,5 @@
+package Exercise2A;
+
 import java.util.concurrent.Semaphore;
 
 public class RopeBridge {
